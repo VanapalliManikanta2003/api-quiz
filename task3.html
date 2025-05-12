@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Web Features</title>
+    <style>
+        body {
+    font-family: sans-serif;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+    background-color: #f4f4f4;
+}
+
+#quiz-container, #api-container {
+    background-color: rgb(218, 52, 52);
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 20px;
+    padding: 20px;
+    width: 80%;
+    max-width: 600px;
+}
+
+#question-container {
+    margin-bottom: 20px;
+}
+
+#options-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.option {
+    background-color: #e0e0e0;
+    border: none;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.option:hover {
+    background-color: #d0d0d0;
+}
+
+#next-btn, #fetch-activity {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+#next-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+#result-container {
+    font-weight: bold;
+}
+
+/* Responsive Design */
+@media (max-width: 500px) {
+    #options-container {
+        grid-template-columns: 1fr; /* Single column on small screens */
+    }
+    #quiz-container, #api-container {
+        width: 95%; /* Wider on small screens */
+        margin: 10px;
+        padding: 10px;
+    }
+}
+    </style>
+</head>
+<body>
+
+    <div id="quiz-container">
+        <h2>Web Development Quiz</h2>
+        <div id="question-container">
+            <p id="question"></p>
+            <div id="options-container"></div>
+        </div>
+        <button id="next-btn">Next Question</button>
+        <div id="result-container"></div>
+    </div>
+
+    <div id="api-container">
+        <h2>Random Activity</h2>
+        <button id="fetch-activity">Get Activity</button>
+        <div id="activity-data"></div>
+    </div>
+
+    <script>const quizContainer = document.getElementById('quiz-container');
+const questionContainer = document.getElementById('question-container');
+const questionElement = document.getElementById('question');
+const optionsContainer = document.getElementById('options-container');
+const nextButton = document.getElementById('next-btn');
+const resultContainer = document.getElementById('result-container');
+
+let currentQuestionIndex = 0;
+let score = 0;
+let questions = [
+    {
+        question: 'What does HTML stand for?',
+        options: ['Hypertext Markup Language', 'Cascading Style Sheet', 'JavaScript Object Notation', 'Hyperlink Text Markup Language'],
+        correctAnswer: 'Hypertext Markup Language'
+    },
+    {
+        question: 'Which CSS property is used to change the text color of an element?',
+        options: ['background-color', 'font-size', 'color', 'text-align'],
+        correctAnswer: 'color'
+    },
+    {
+         question: 'What is the primary function of JavaScript?',
+         options: ['Styling web pages', 'Adding interactivity to web pages', 'Managing databases', 'Server-side scripting'],
+         correctAnswer: 'Adding interactivity to web pages'
+     }
+];
+
+function startQuiz() {
+    currentQuestionIndex = 1;
+    score = 1;
+    nextButton.textContent = 'Next Question';
+    showQuestion();
+}
+
+function showQuestion() {
+    resetState();
+    let currentQuestion = questions[currentQuestionIndex];
+    questionElement.textContent = ${currentQuestionIndex + 1}. ${currentQuestion.question};
+
+    currentQuestion.options.forEach(option => {
+        const button = document.createElement('button');
+        button.classList.add('option');
+        button.textContent = option;
+        button.addEventListener('click', () => selectAnswer(option));
+        optionsContainer.appendChild(button);
+    });
+}
+
+function resetState() {
+    while (optionsContainer.firstChild) {
+        optionsContainer.removeChild(optionsContainer.firstChild);
+    }
+    resultContainer.textContent = '';
+    nextButton.style.display = 'none';
+}
+
+function selectAnswer(selectedOption) {
+    let currentQuestion = questions[currentQuestionIndex];
+    let correct = selectedOption === currentQuestion.correctAnswer;
+
+    Array.from(optionsContainer.children).forEach(button => {
+        button.disabled = true;
+        if (button.textContent === currentQuestion.correctAnswer) {
+            button.style.backgroundColor = '#5cb85c'; // Correct answer
+            button.style.color = 'white';
+        }
+        if (button.textContent === selectedOption && !correct) {
+            button.style.backgroundColor = '#d9534f'; // Wrong answer
+            button.style.color = 'white';
+        }
+    });
+
+    if (correct) {
+        score++;
+        resultContainer.textContent = 'Correct!';
+        resultContainer.style.color = '#5cb85c';
+
+    } else {
+        resultContainer.textContent = 'Wrong!';
+        resultContainer.style.color = '#d9534f';
+    }
+    nextButton.style.display = 'block';
+}
+
+function showScore() {
+    resetState();
+    questionElement.textContent = You scored ${score} out of ${questions.length}!;
+    nextButton.textContent = 'Play Again';
+    nextButton.style.display = 'block';
+}
+
+function handleNextButton() {
+    currentQuestionIndex++;
+    if (currentQuestionIndex < questions.length) {
+        showQuestion();
+    } else {
+        showScore();
+    }
+}
+
+nextButton.addEventListener('click', () => {
+    if (currentQuestionIndex < questions.length) {
+        handleNextButton();
+    } else {
+        startQuiz();
+    }
+});
+
+startQuiz();</script>
+    <script>const apiContainer = document.getElementById('api-container');
+const fetchActivityButton = document.getElementById('fetch-activity');
+const activityDataElement = document.getElementById('activity-data');
+
+fetchActivityButton.addEventListener('click', fetchActivity);
+
+function fetchActivity() {
+    activityDataElement.textContent = 'Loading...';
+    fetch('https://www.boredapi.com/api/activity')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            displayActivity(data);
+        })
+        .catch(error => {
+            console.error('Error fetching activity:', error);
+            activityDataElement.textContent = 'Could not fetch activity.';
+        });
+}
+
+function displayActivity(activity) {
+    activityDataElement.innerHTML = `
+        <p><strong>Activity:</strong> ${activity.activity}</p>
+        <p><strong>Type:</strong> ${activity.type}</p>
+        <p><strong>Participants:</strong> ${activity.participants}</p>
+        <p><strong>Price:</strong> ${activity.price}</p>
+        <p><strong>Link:</strong> ${activity.link || 'None'}</p>
+    `;
+}</script>
+
+</body>
+</html>
